@@ -1,45 +1,51 @@
 import matplotlib.pyplot as plt
 import random
-import time
+import timeit
+import gc
 import csv
-from binary_search_tree import BinarySearchTree, AVLTree
+from binary_search_tree import BinarySearchTree
 from linked_list import OrderedLinkedList
+from AVL import AVLTree
 
 
-def test_os_operation_performance(data_structure_type, operation, use_random_selection=False):
+def test_os_operation_performance(data_structure_type, operation, max_size, use_random_selection=False, num_runs=3):
+    random.seed(42)  # Fix the seed for reproducibility
+    gc.disable()  # Disable garbage collector
 
     # Initialize the specified data structure
-    if data_structure_type == 'OrderedLinkedList':
-        ds = OrderedLinkedList()
-        list_sizes = range(10, 6000, 300)
-    elif data_structure_type == 'BinarySearchTree':
-        ds = BinarySearchTree()
-        list_sizes = range(10, 7000, 300)
-    elif data_structure_type == 'AVLTree':
-        ds = AVLTree()
-        list_sizes = range(10, 7000, 300)
-    else:
+    data_structure_classes = {
+        'OrderedLinkedList': OrderedLinkedList,
+        'BinarySearchTree': BinarySearchTree,
+        'AVLTree': AVLTree
+    }
+    ds_class = data_structure_classes.get(data_structure_type)
+    if ds_class is None:
         raise ValueError("Unsupported data structure type.")
 
     operation_times = []
+    list_sizes = range(10, max_size, 700)  # More granular steps
 
     for size in list_sizes:
-        ds = ds.__class__()
+        time_taken = 0
+        for _ in range(num_runs):  # Repeat test to get an average
+            ds = ds_class()
+            for i in range(size):
+                ds.insert(random.randint(1, 2*size))  # Variable random range
 
-        for i in range(1, size + 1):
-            ds.insert(random.randint(1, 1000))
+            target = random.randint(1, size) if use_random_selection else 1  # Random or middle element
 
-        target = random.randint(1, size) if use_random_selection else size // 2 if operation == 'os_select' else size
+            start = timeit.default_timer()
+            if operation == 'os_select':
+                ds.os_select(target)
+            elif operation == 'os_rank':
+                ds.os_rank(target)
+            else:
+                raise ValueError("Unsupported operation. Use 'os_select' or 'os_rank'.")
+            time_taken += timeit.default_timer() - start
 
-        start_time = time.time()
-        if operation == 'os_select':
-            ds.os_select(target)
-        elif operation == 'os_rank':
-            ds.os_rank(target)
-        else:
-            raise ValueError("Unsupported operation. Use 'os_select' or 'os_rank'.")
-        end_time = time.time()
-        operation_times.append(end_time - start_time)
+        operation_times.append(time_taken / num_runs)  # Average time
+
+    gc.enable()  # Re-enable garbage collector
 
     return list_sizes, operation_times
 
@@ -66,13 +72,14 @@ def plot_performance(list_sizes, operation_times, title):
 
 def plot_multiple_performances(list_sizes_list, operation_times_list, labels, title):
     plt.figure(figsize=(10, 5))
-    colors = ['b', 'g', 'r']  # Predefined colors for the plots
+    colors = ['b', 'g', 'r']
     for i, (list_sizes, operation_times) in enumerate(zip(list_sizes_list, operation_times_list)):
         plt.plot(list_sizes, operation_times, marker='o', linestyle='-', color=colors[i], label=labels[i])
 
     plt.title(title)
     plt.xlabel('List Size')
     plt.ylabel('Time (seconds)')
+    plt.yscale('log')  # Logarithmic scale
     plt.legend()
     plt.grid(True)
     plt.show()
