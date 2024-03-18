@@ -3,9 +3,8 @@ import random
 import timeit
 import gc
 import csv
-from binary_search_tree import BinarySearchTree
+from binary_tree import BinarySearchTree, AVLTree
 from linked_list import OrderedLinkedList
-from AVL import AVLTree
 
 
 def test_os_operation_performance(data_structure_type, operation, max_size, use_random_selection=False, num_runs=3):
@@ -32,7 +31,7 @@ def test_os_operation_performance(data_structure_type, operation, max_size, use_
             for i in range(size):
                 ds.insert(random.randint(1, 2*size))  # Variable random range
 
-            target = random.randint(1, size) if use_random_selection else 1  # Random or middle element
+            target = random.randint(1, size) if use_random_selection else size//2  # Random or middle element
 
             start = timeit.default_timer()
             if operation == 'os_select':
@@ -79,7 +78,7 @@ def plot_multiple_performances(list_sizes_list, operation_times_list, labels, ti
     plt.title(title)
     plt.xlabel('List Size')
     plt.ylabel('Time (seconds)')
-    plt.yscale('log')  # Logarithmic scale
+    #plt.yscale('log')  # Logarithmic scale
     plt.legend()
     plt.grid(True)
     plt.show()
