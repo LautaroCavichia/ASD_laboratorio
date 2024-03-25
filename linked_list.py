@@ -15,6 +15,8 @@ class OrderedLinkedList:
             self.head = new_node
             self.size += 1
         elif self.head.key > key:
+            if self.head.key == key:
+                return  # No duplicates allowed
             new_node.next = self.head
             self.head = new_node
             self.size += 1

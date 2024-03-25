@@ -7,11 +7,10 @@ from binary_tree import BinarySearchTree, AVLTree
 from linked_list import OrderedLinkedList
 
 
-def test_os_operation_performance(data_structure_type, operation, max_size, use_random_selection=False, num_runs=3):
-    random.seed(42)  # Fix the seed for reproducibility
+def test_os_operation_performance(data_structure_type, operation, max_size, case='middle', num_runs=3):
+    random.seed(42)
     gc.disable()  # Disable garbage collector
 
-    # Initialize the specified data structure
     data_structure_classes = {
         'OrderedLinkedList': OrderedLinkedList,
         'BinarySearchTree': BinarySearchTree,
@@ -22,16 +21,30 @@ def test_os_operation_performance(data_structure_type, operation, max_size, use_
         raise ValueError("Unsupported data structure type.")
 
     operation_times = []
-    list_sizes = range(10, max_size, 700)  # More granular steps
+    list_sizes = range(1, max_size, 600)
 
     for size in list_sizes:
         time_taken = 0
-        for _ in range(num_runs):  # Repeat test to get an average
+
+
+        for _ in range(num_runs):
             ds = ds_class()
             for i in range(size):
-                ds.insert(random.randint(1, 2*size))  # Variable random range
+                #insert first number for testing best case
+                if case == 'best' and i == 0:
+                    ds.insert(1)
+                ds.insert(random.randint(1, 2*size))
 
-            target = random.randint(1, size) if use_random_selection else size//2  # Random or middle element
+            if case == 'middle':
+                target = size // 2
+            elif case == 'worst':
+                target = 2*size - 1
+            elif case == 'best':
+                target = 1
+            elif case == 'random':
+                target = random.randint(1, size)
+            else:
+                raise ValueError("Unsupported case")
 
             start = timeit.default_timer()
             if operation == 'os_select':
@@ -39,10 +52,10 @@ def test_os_operation_performance(data_structure_type, operation, max_size, use_
             elif operation == 'os_rank':
                 ds.os_rank(target)
             else:
-                raise ValueError("Unsupported operation. Use 'os_select' or 'os_rank'.")
+                raise ValueError("Unsupported operation")
             time_taken += timeit.default_timer() - start
 
-        operation_times.append(time_taken / num_runs)  # Average time
+        operation_times.append(time_taken / num_runs)
 
     gc.enable()  # Re-enable garbage collector
 
@@ -71,7 +84,7 @@ def plot_performance(list_sizes, operation_times, title):
 
 def plot_multiple_performances(list_sizes_list, operation_times_list, labels, title):
     plt.figure(figsize=(10, 5))
-    colors = ['b', 'g', 'r']
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     for i, (list_sizes, operation_times) in enumerate(zip(list_sizes_list, operation_times_list)):
         plt.plot(list_sizes, operation_times, marker='o', linestyle='-', color=colors[i], label=labels[i])
 

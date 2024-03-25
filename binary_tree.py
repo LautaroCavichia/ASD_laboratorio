@@ -14,6 +14,7 @@ class Node(BaseNode):
 class AVLNode(BaseNode):
     def __init__(self, key):
         super().__init__(key)
+        self.parent = None
         self.height = 1
         self.size = 1
 
@@ -62,7 +63,9 @@ class BinarySearchTree(BaseTree):
     def recursive_insert(self, node, key):
         if node is None:
             return Node(key)
-        if key < node.key:
+        if key == node.key:
+            return node  # No duplicates allowed
+        elif key < node.key:
             node.left = self.recursive_insert(node.left, key)
             node.left.parent = node
         elif key > node.key:
@@ -79,7 +82,7 @@ class BinarySearchTree(BaseTree):
 
     def os_rank(self, key):
         result = []
-        self.inorder_tree_walk(self.root, result,)
+        self.inorder_tree_walk(self.root, result)
         rank = 1
         for k in result:
             if k == key:
@@ -155,7 +158,7 @@ class AVLTree(BaseTree):
 
     def _os_rank(self, node, key):
         if not node:
-            return 0  # Key not in tree
+            return 0
         if key == node.key:
             return (node.left.size if node.left else 0) + 1
         elif key < node.key:
