@@ -21,30 +21,47 @@ def test_os_operation_performance(data_structure_type, operation, max_size, case
         raise ValueError("Unsupported data structure type.")
 
     operation_times = []
-    list_sizes = range(1, max_size, 600)
+    list_sizes = range(10, max_size, 700)
 
     for size in list_sizes:
         time_taken = 0
 
-
         for _ in range(num_runs):
             ds = ds_class()
             for i in range(size):
-                #insert first number for testing best case
-                if case == 'best' and i == 0:
-                    ds.insert(1)
+                if operation == 'os_rank':
+                    if case == 'best' and i == 0:
+                        ds.insert(1)
+                    if case == 'middle' and i == size // 2:
+                        ds.insert(size)
+                    if case == 'worst' and i == size - 1:
+                        ds.insert(2*size)
                 ds.insert(random.randint(1, 2*size))
 
-            if case == 'middle':
-                target = size // 2
-            elif case == 'worst':
-                target = 2*size - 1
-            elif case == 'best':
-                target = 1
-            elif case == 'random':
-                target = random.randint(1, size)
-            else:
-                raise ValueError("Unsupported case")
+            if operation == 'os_select':
+                if case == 'middle':
+                    target = size // 2
+                elif case == 'worst':
+                    target = size
+                    print(target)
+                elif case == 'best':
+                    target = 1
+                elif case == 'random':
+                    target = random.randint(1, size)
+                else:
+                    raise ValueError("Unsupported case")
+
+            elif operation == 'os_rank':
+                if case == 'middle':
+                    target = size
+                elif case == 'worst':
+                    target = 2*size
+                elif case == 'best':
+                    target = 1
+                elif case == 'random':
+                    target = random.randint(1, 2*size)
+                else:
+                    raise ValueError("Unsupported case")
 
             start = timeit.default_timer()
             if operation == 'os_select':
@@ -82,7 +99,7 @@ def plot_performance(list_sizes, operation_times, title):
     plt.show()
 
 
-def plot_multiple_performances(list_sizes_list, operation_times_list, labels, title):
+def plot_multiple_performances(list_sizes_list, operation_times_list, labels, title, scale='linear'):
     plt.figure(figsize=(10, 5))
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     for i, (list_sizes, operation_times) in enumerate(zip(list_sizes_list, operation_times_list)):
@@ -91,7 +108,8 @@ def plot_multiple_performances(list_sizes_list, operation_times_list, labels, ti
     plt.title(title)
     plt.xlabel('List Size')
     plt.ylabel('Time (seconds)')
-    #plt.yscale('log')  # Logarithmic scale
+    if scale == 'log':
+        plt.yscale('log')  # Logarithmic scale
     plt.legend()
     plt.grid(True)
     plt.show()
