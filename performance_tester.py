@@ -21,7 +21,7 @@ def test_os_operation_performance(data_structure_type, operation, max_size, case
         raise ValueError("Unsupported data structure type.")
 
     operation_times = []
-    list_sizes = range(10, max_size, 700)
+    list_sizes = range(10, max_size, 1000)
 
     for size in list_sizes:
         time_taken = 0
@@ -40,14 +40,19 @@ def test_os_operation_performance(data_structure_type, operation, max_size, case
 
             if operation == 'os_select':
                 if case == 'middle':
-                    target = size // 2
+                    if ds_class == AVLTree:
+                        target = size // 4
+                    else:
+                        target = size // 2
                 elif case == 'worst':
                     target = size
-                    print(target)
                 elif case == 'best':
-                    target = 1
+                    if ds_class == AVLTree:
+                        target = size // 2 + random.randint(1, size // 4)
+                    else:
+                        target = 1
                 elif case == 'random':
-                    target = random.randint(1, size)
+                    target = random.randint(1, size//2)
                 else:
                     raise ValueError("Unsupported case")
 
@@ -113,4 +118,22 @@ def plot_multiple_performances(list_sizes_list, operation_times_list, labels, ti
     plt.legend()
     plt.grid(True)
     plt.show()
+
+
+def avl_worst_case():
+    operation_times = []
+    avl = AVLTree()
+    list_sizes = range(10, 40000, 1000)
+    for size in list_sizes:
+        for i in range(40000):
+            avl.insert(i)
+
+        start = timeit.default_timer()
+        avl.os_select(40000)
+        time_taken = timeit.default_timer() - start
+        operation_times.append(time_taken)
+    return list_sizes, operation_times
+
+
+
 
