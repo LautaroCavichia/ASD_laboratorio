@@ -12,13 +12,11 @@ def run_test(data_structure_type, operation, size, case):
         data_structure = generate_avl_data(size)
         if operation == 'os_select':
             if case == 'best':
-                # Targeting the middle for best case, assuming perfect balance
                 select_target = size // 2
             elif case == 'average':
-                # Randomly selecting an index as an average case
                 select_target = random.randint(1, size)
             else:
-                select_target = size
+                select_target = random.randint(size/2 , size)
         elif operation == 'os_rank':
             # Generating all possible keys and selecting based on case
             all_keys = [i for i in range(size)]
@@ -124,7 +122,7 @@ def plot_results(results, operation, scale='linear', different_data_structures=T
             times = [avg_time for ds_type, size, avg_time, c in results if c == case]
             plt.plot(sizes, times, marker='o', label=f'{case} case')
 
-    plt.title(f'{operation.capitalize()} Performance Comparison')
+    plt.title(f'{operation} performance comparison')
     plt.xlabel('Size')
     plt.ylabel('Time (s)')
     plt.legend()
@@ -133,6 +131,29 @@ def plot_results(results, operation, scale='linear', different_data_structures=T
     plt.tight_layout()
     plt.grid(True, which="both", ls="--")
     plt.show()
+
+
+def double_plot_results(results1, results2, operation, scale='linear'):
+    plt.figure(figsize=(10, 5))
+    for case in ['average', 'worst']:
+        sizes = [size for ds_type, size, avg_time, c in results1 if c == case]
+        times = [avg_time for ds_type, size, avg_time, c in results1 if c == case]
+        plt.plot(sizes, times, marker='o', label=f'{case} case {results1[0][0]}')
+
+        sizes = [size for ds_type, size, avg_time, c in results2 if c == case]
+        times = [avg_time for ds_type, size, avg_time, c in results2 if c == case]
+        plt.plot(sizes, times, marker='o', label=f'{case} case {results2[0][0]}')
+
+    plt.title(f'{operation} performance comparison')
+    plt.xlabel('Size')
+    plt.ylabel('Time (s)')
+    plt.legend()
+    if scale == 'log':
+        plt.yscale('log')
+    plt.tight_layout()
+    plt.grid(True, which="both", ls="--")
+    plt.show()
+
 
 
 def export_to_latex_direct(results, operation_case):
